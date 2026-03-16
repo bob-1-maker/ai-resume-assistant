@@ -1,0 +1,106 @@
+/* 简约单栏模板 */
+.tmpl-simple {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+.tmpl-simple .section {
+  margin-bottom: 20mm;
+}
+
+.tmpl-simple .section-title {
+  font-size: 14pt;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 5mm;
+  margin-bottom: 10mm;
+}
+
+.tmpl-simple .basic-info {
+  text-align: center;
+  margin-bottom: 20mm;
+}
+
+.tmpl-simple .basic-info h1 {
+  font-size: 18pt;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 5mm 0;
+}
+
+.tmpl-simple .basic-info .contact {
+  font-size: 10pt;
+  color: #7f8c8d;
+  margin: 5mm 0;
+}
+
+.tmpl-simple .basic-info .summary {
+  margin: 10mm 0;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.tmpl-simple .education-item,
+.tmpl-simple .work-item,
+.tmpl-simple .project-item {
+  margin-bottom: 10mm;
+}
+
+.tmpl-simple .item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3mm;
+}
+
+.tmpl-simple .item-title {
+  font-weight: 600;
+  color: #34495e;
+}
+
+.tmpl-simple .item-period {
+  font-size: 10pt;
+  color: #7f8c8d;
+}
+
+.tmpl-simple .item-subtitle {
+  font-size: 11pt;
+  color: #7f8c8d;
+  margin-bottom: 3mm;
+}
+
+.tmpl-simple .item-description {
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #555;
+}
+
+.tmpl-simple .skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5mm;
+}
+
+.tmpl-simple .skill-item {
+  background: #f8f9fa;
+  padding: 3mm 6mm;
+  border-radius: 4px;
+  font-size: 10pt;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+@media print {
+  .tmpl-simple {
+    box-shadow: none;
+    padding: 0;
+  }
+}

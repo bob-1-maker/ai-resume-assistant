@@ -1,0 +1,129 @@
+/* 校园风模板 */
+.tmpl-campus {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  position: relative;
+}
+
+.tmpl-campus::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10mm;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  border-radius: 8px 8px 0 0;
+}
+
+.tmpl-campus .section {
+  margin-bottom: 15mm;
+}
+
+.tmpl-campus .section-title {
+  font-size: 13pt;
+  font-weight: 600;
+  color: #4CAF50;
+  border-left: 4px solid #4CAF50;
+  padding-left: 5mm;
+  margin-bottom: 8mm;
+}
+
+.tmpl-campus .basic-info {
+  text-align: center;
+  margin-bottom: 15mm;
+  padding-top: 10mm;
+}
+
+.tmpl-campus .basic-info h1 {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #2E7D32;
+  margin: 0 0 5mm 0;
+}
+
+.tmpl-campus .basic-info .contact {
+  font-size: 10pt;
+  color: #666;
+  margin: 5mm 0;
+}
+
+.tmpl-campus .basic-info .summary {
+  margin: 10mm 0;
+  text-align: left;
+  line-height: 1.6;
+  color: #555;
+}
+
+.tmpl-campus .education-item,
+.tmpl-campus .work-item,
+.tmpl-campus .project-item {
+  margin-bottom: 8mm;
+  padding-left: 8mm;
+  border-left: 2px solid #E8F5E8;
+}
+
+.tmpl-campus .item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3mm;
+}
+
+.tmpl-campus .item-title {
+  font-weight: 600;
+  color: #2E7D32;
+}
+
+.tmpl-campus .item-period {
+  font-size: 10pt;
+  color: #888;
+  background: #F1F8E9;
+  padding: 1mm 4mm;
+  border-radius: 10px;
+}
+
+.tmpl-campus .item-subtitle {
+  font-size: 11pt;
+  color: #666;
+  margin-bottom: 3mm;
+}
+
+.tmpl-campus .item-description {
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #555;
+}
+
+.tmpl-campus .skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4mm;
+}
+
+.tmpl-campus .skill-item {
+  background: #E8F5E8;
+  padding: 3mm 6mm;
+  border-radius: 15px;
+  font-size: 10pt;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+}
+
+@media print {
+  .tmpl-campus {
+    box-shadow: none;
+    padding: 0;
+  }
+  
+  .tmpl-campus::before {
+    display: none;
+  }
+}
