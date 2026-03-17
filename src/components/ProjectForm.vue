@@ -3,53 +3,15 @@ import { ref, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useResumeStore } from '@/store'
 import type { Project } from '@/types'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
-import Bold from '@tiptap/extension-bold'
-import BulletList from '@tiptap/extension-bullet-list'
-import ListItem from '@tiptap/extension-list-item'
-import HardBreak from '@tiptap/extension-hard-break'
-import Link from '@tiptap/extension-link'
 
 const resumeStore = useResumeStore()
 
 const projects = ref<Project[]>([])
-const editors = ref<Record<string, any>>({})
 
 const syncProjects = () => {
   if (resumeStore.currentResume) {
     projects.value = [...(resumeStore.currentResume.project || [])]
-    initEditors()
   }
-}
-
-const initEditors = () => {
-  projects.value.forEach(project => {
-    if (!editors.value[project.id]) {
-      editors.value[project.id] = useEditor({
-        content: project.description || '',
-        extensions: [
-          StarterKit.configure({
-            bold: false,
-            listItem: false,
-            bulletList: false,
-            hardBreak: false,
-            link: false
-          }),
-          Bold,
-          BulletList,
-          ListItem,
-          HardBreak,
-          Link.configure({
-            openOnClick: true
-          })
-        ],
-        onUpdate: ({ editor }) => {
-          updateProject(project.id, 'description', editor.getHTML())
-        }
-      })
-    }
-  })
 }
 
 const saveProjects = () => {
@@ -73,7 +35,6 @@ const addProject = () => {
     technologies: []
   }
   projects.value.push(newProject)
-  initEditors()
   saveProjects()
   ElMessage.success('项目经验添加成功！')
 }
@@ -82,7 +43,6 @@ const removeProject = (id: string) => {
   const index = projects.value.findIndex(project => project.id === id)
   if (index >= 0) {
     projects.value.splice(index, 1)
-    delete editors.value[id]
     saveProjects()
     ElMessage.success('项目经验删除成功！')
   }
@@ -211,34 +171,13 @@ watch(() => resumeStore.currentResume, () => {
           </el-row>
           
           <el-form-item label="项目描述" required>
-            <div class="editor-container">
-              <div class="editor-toolbar">
-                <el-button 
-                  type="text" 
-                  @click="editors[project.id]?.chain().focus().toggleBold().run()"
-                  :class="{ active: editors[project.id]?.isActive('bold') }"
-                >
-                  <el-icon><Bold /></el-icon>
-                </el-button>
-                <el-button 
-                  type="text" 
-                  @click="editors[project.id]?.chain().focus().toggleBulletList().run()"
-                  :class="{ active: editors[project.id]?.isActive('bulletList') }"
-                >
-                  <el-icon><List /></el-icon>
-                </el-button>
-                <el-button 
-                  type="text" 
-                  @click="editors[project.id]?.chain().focus().setLink({ href: prompt('请输入链接地址') }).run()"
-                >
-                  <el-icon><Link /></el-icon>
-                </el-button>
-              </div>
-              <EditorContent 
-                :editor="editors[project.id]" 
-                class="editor-content"
-              />
-            </div>
+            <el-input
+              v-model="project.description"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入项目描述，支持多行输入&#10;• 使用 • 或 - 开头添加列表项&#10;• 支持换行分段"
+              @input="updateProject(project.id, 'description', project.description)"
+            />
           </el-form-item>
           
           <el-form-item label="技术栈">
@@ -310,50 +249,6 @@ watch(() => resumeStore.currentResume, () => {
   font-size: 14px;
   font-weight: 600;
   color: #409eff;
-}
-
-.editor-container {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.editor-toolbar {
-  display: flex;
-  gap: 10px;
-  padding: 8px 12px;
-  background: #f5f7fa;
-  border-bottom: 1px solid #dcdfe6;
-}
-
-.editor-toolbar .el-button {
-  padding: 4px 8px;
-}
-
-.editor-toolbar .el-button.active {
-  color: #409eff;
-  background: #ecf5ff;
-  border-color: #d9ecff;
-}
-
-.editor-content {
-  padding: 12px;
-  min-height: 120px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.editor-content :deep(p) {
-  margin: 0 0 10px 0;
-}
-
-.editor-content :deep(ul) {
-  margin: 0 0 10px 0;
-  padding-left: 20px;
-}
-
-.editor-content :deep(li) {
-  margin: 5px 0;
 }
 
 .tech-tag {

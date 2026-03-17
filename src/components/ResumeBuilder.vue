@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElLoading } from 'element-plus'
-import draggable from 'vuedraggable'
 import { useResumeStore } from '@/store'
 import AIGenerate from './AIGenerate.vue'
 import AIOptimize from './AIOptimize.vue'
+import BasicInfoForm from './BasicInfoForm.vue'
 import EducationForm from './EducationForm.vue'
 import WorkForm from './WorkForm.vue'
 import ProjectForm from './ProjectForm.vue'
@@ -74,6 +74,26 @@ const handleTemplateChange = async (template: string) => {
 
 const togglePreviewMode = () => {
   isPreviewMode.value = !isPreviewMode.value
+}
+
+const moveModule = (index: number, direction: number) => {
+  if (!resumeStore.currentResume) return
+  
+  const newOrder = [...moduleOrder.value]
+  const newIndex = index + direction
+  
+  if (newIndex >= 0 && newIndex < newOrder.length) {
+    // 交换位置
+    [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]]
+    moduleOrder.value = newOrder
+    
+    const updatedResume = {
+      ...resumeStore.currentResume,
+      moduleOrder: newOrder
+    }
+    resumeStore.saveResume(updatedResume)
+    ElMessage.success('模块顺序已保存！')
+  }
 }
 
 const handleDragEnd = () => {
@@ -172,19 +192,34 @@ const handleDragEnd = () => {
           </div>
         </template>
         
-        <draggable
-          v-model="moduleOrder"
-          item-key="id"
-          @end="handleDragEnd"
-          class="modules-list"
-        >
-          <template #item="{ element }">
-            <div class="module-item">
-              <el-icon class="drag-icon"><Menu /></el-icon>
-              <span>{{ modules.find(m => m.id === element)?.name }}</span>
+        <div class="modules-list">
+          <div
+            v-for="(element, index) in moduleOrder"
+            :key="element"
+            class="module-item"
+          >
+            <el-icon class="drag-icon"><Menu /></el-icon>
+            <span>{{ modules.find(m => m.id === element)?.name }}</span>
+            <div class="module-controls">
+              <el-button
+                type="text"
+                size="small"
+                @click="moveModule(index, -1)"
+                :disabled="index === 0"
+              >
+                <el-icon><ArrowUp /></el-icon>
+              </el-button>
+              <el-button
+                type="text"
+                size="small"
+                @click="moveModule(index, 1)"
+                :disabled="index === moduleOrder.length - 1"
+              >
+                <el-icon><ArrowDown /></el-icon>
+              </el-button>
             </div>
-          </template>
-        </draggable>
+          </div>
+        </div>
       </el-card>
       
       <!-- 模块内容 -->
@@ -535,7 +570,6 @@ const handleDragEnd = () => {
   background: white;
   border: 1px solid #e4e7ed;
   border-radius: 8px;
-  cursor: move;
   transition: all 0.3s;
 }
 
@@ -547,11 +581,12 @@ const handleDragEnd = () => {
 .drag-icon {
   margin-right: 12px;
   color: #c0c4cc;
-  cursor: grab;
 }
 
-.drag-icon:active {
-  cursor: grabbing;
+.module-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
 }
 
 .modules-content {

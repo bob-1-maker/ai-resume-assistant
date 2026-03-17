@@ -37,8 +37,9 @@ const optimizeWithAI = async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        text: originalText.value,
-        jobType: jobType.value
+        resumeData: resumeStore.currentResume || {},
+        section: '求职岗位',
+        content: originalText.value
       })
     })
     
@@ -48,14 +49,13 @@ const optimizeWithAI = async () => {
     
     const result = await response.json()
     
-    if (result.success) {
-      optimizedText.value = result.data.optimizedText || ''
-      problems.value = result.data.problems || []
-      keywords.value = result.data.keywords || []
+    if (result.code === 200) {
+      optimizedText.value = result.data.content || ''
       showResult.value = true
-      ElMessage.success('AI 优化成功！')
+      ElMessage.success('AI 优化成功！' + result.msg)
+      console.log('AI 优化结果:', result.data.content)
     } else {
-      throw new Error(result.message || '优化失败')
+      throw new Error(result.msg || '优化失败')
     }
   } catch (error) {
     console.error('AI 优化失败:', error)

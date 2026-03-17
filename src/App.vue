@@ -8,7 +8,7 @@ const resumeStore = useResumeStore()
 const newResumeName = ref('')
 const dialogVisible = ref(false)
 
-const handleCreateResume = async () => {
+const handleCreateResume = () => {
   if (!newResumeName.value.trim()) {
     ElMessage.warning('请输入简历名称')
     return

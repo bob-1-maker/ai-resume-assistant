@@ -1,24 +1,51 @@
 {
-  "name": "ai-resume-assistant-backend",
+  "name": "ai-resume-assistant",
   "version": "1.0.0",
-  "description": "AI 简历助手后端服务",
-  "main": "server.js",
+  "description": "AI 简历助手 - 智能简历生成工具",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
     "start": "node server.js",
-    "dev": "node server.js"
+    "server": "node server.js",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
+    "@element-plus/icons-vue": "^2.3.2",
+    "@tauri-apps/api": "^1.5.0",
+    "@vueuse/core": "^14.2.1",
     "axios": "^1.6.2",
-    "dotenv": "^16.3.1"
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "element-plus": "^2.13.5",
+    "express": "^4.18.2",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.14.0",
+    "jspdf": "^2.5.1",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0",
+    "vuedraggable": "^2.24.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0",
+    "@types/node": "^20.11.24",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
+    "vue-tsc": "^1.8.27"
   },
   "keywords": [
     "ai",
     "resume",
     "assistant",
-    "backend"
+    "vue3",
+    "tauri",
+    "typescript"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

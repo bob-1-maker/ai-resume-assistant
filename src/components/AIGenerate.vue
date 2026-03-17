@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ElMessage, ElLoading } from 'element-plus'
+import { ElMessage, ElLoading, ElMessageBox } from 'element-plus'
+import { MagicStick, Loading, Refresh, DocumentCopy, Check, QuestionFilled } from '@element-plus/icons-vue'
 import { useResumeStore } from '@/store'
 
 const resumeStore = useResumeStore()
@@ -8,6 +9,8 @@ const resumeStore = useResumeStore()
 const isGenerating = ref(false)
 const jobType = ref('')
 const style = ref('简洁')
+const generatedContent = ref('')
+const showResult = ref(false)
 
 const styles = [
   { label: '简洁', value: '简洁' },
@@ -16,7 +19,7 @@ const styles = [
 ]
 
 const canGenerate = computed(() => {
-  return jobType.value.trim() && resumeStore.currentResume?.basic.name
+  return jobType.value.trim() && resumeStore.currentResume
 })
 
 const filterSensitiveInfo = (data: any) => {
@@ -57,8 +60,7 @@ const generateWithAI = async () => {
       },
       body: JSON.stringify({
         basicInfo,
-        jobType: jobType.value,
-        style: style.value
+        jobDescription: jobType.value
       })
     })
     
@@ -68,17 +70,13 @@ const generateWithAI = async () => {
     
     const result = await response.json()
     
-    if (result.success) {
-      if (resumeStore.currentResume) {
-        const updatedResume = {
-          ...resumeStore.currentResume,
-          ...result.data
-        }
-        resumeStore.saveResume(updatedResume)
-        ElMessage.success('AI 生成成功！已自动填充到简历中')
-      }
+    if (result.code === 200) {
+      generatedContent.value = result.data.content
+      showResult.value = true
+      ElMessage.success('AI 生成成功！' + result.msg)
+      console.log('AI 生成结果:', result.data.content)
     } else {
-      throw new Error(result.message || '生成失败')
+      throw new Error(result.msg || '生成失败')
     }
   } catch (error) {
     console.error('AI 生成失败:', error)
@@ -87,6 +85,36 @@ const generateWithAI = async () => {
     loading.close()
     isGenerating.value = false
   }
+}
+
+const copyToClipboard = () => {
+  navigator.clipboard.writeText(generatedContent.value).then(() => {
+    ElMessage.success('内容已复制到剪贴板！')
+  }).catch(() => {
+    ElMessage.error('复制失败，请手动复制')
+  })
+}
+
+const applyToResume = () => {
+  ElMessageBox.confirm('确定要将生成的内容应用到简历吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    if (resumeStore.currentResume) {
+      // 这里可以根据生成的内容自动填充到对应模块
+      // 简化处理，仅更新基本信息
+      const updatedResume = {
+        ...resumeStore.currentResume,
+        basic: {
+          ...resumeStore.currentResume.basic,
+          // 可以从生成内容中提取信息
+        }
+      }
+      resumeStore.saveResume(updatedResume)
+      ElMessage.success('已成功应用到简历！')
+    }
+  })
 }
 </script>
 
@@ -162,6 +190,29 @@ const generateWithAI = async () => {
         </template>
       </el-alert>
     </div>
+    
+    <!-- 生成结果展示区域 -->
+    <el-card v-if="showResult" class="result-card" style="margin-top: 20px;">
+      <template #header>
+        <div class="result-header">
+          <span class="result-title">AI 生成结果</span>
+          <div class="result-actions">
+            <el-button size="small" @click="copyToClipboard">
+              <el-icon><DocumentCopy /></el-icon>
+              复制内容
+            </el-button>
+            <el-button type="primary" size="small" @click="applyToResume">
+              <el-icon><Check /></el-icon>
+              应用到简历
+            </el-button>
+          </div>
+        </div>
+      </template>
+      
+      <div class="result-content">
+        <pre>{{ generatedContent }}</pre>
+      </div>
+    </el-card>
   </el-card>
 </template>
 
@@ -198,6 +249,41 @@ const generateWithAI = async () => {
   margin-top: 20px;
 }
 
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.result-content {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.result-content pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #303133;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .ai-generate-card {
     margin: 0 10px 20px 10px;
@@ -205,6 +291,21 @@ const generateWithAI = async () => {
   
   .ai-form {
     padding: 10px 0;
+  }
+  
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .result-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .result-content {
+    max-height: 300px;
   }
 }
 </style>

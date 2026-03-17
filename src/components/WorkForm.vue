@@ -3,53 +3,15 @@ import { ref, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useResumeStore } from '@/store'
 import type { Work } from '@/types'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
-import Bold from '@tiptap/extension-bold'
-import BulletList from '@tiptap/extension-bullet-list'
-import ListItem from '@tiptap/extension-list-item'
-import HardBreak from '@tiptap/extension-hard-break'
-import Link from '@tiptap/extension-link'
 
 const resumeStore = useResumeStore()
 
 const works = ref<Work[]>([])
-const editors = ref<Record<string, any>>({})
 
 const syncWorks = () => {
   if (resumeStore.currentResume) {
     works.value = [...(resumeStore.currentResume.work || [])]
-    initEditors()
   }
-}
-
-const initEditors = () => {
-  works.value.forEach(work => {
-    if (!editors.value[work.id]) {
-      editors.value[work.id] = useEditor({
-        content: work.description || '',
-        extensions: [
-          StarterKit.configure({
-            bold: false,
-            listItem: false,
-            bulletList: false,
-            hardBreak: false,
-            link: false
-          }),
-          Bold,
-          BulletList,
-          ListItem,
-          HardBreak,
-          Link.configure({
-            openOnClick: true
-          })
-        ],
-        onUpdate: ({ editor }) => {
-          updateWork(work.id, 'description', editor.getHTML())
-        }
-      })
-    }
-  })
 }
 
 const saveWorks = () => {
@@ -72,7 +34,6 @@ const addWork = () => {
     description: ''
   }
   works.value.push(newWork)
-  initEditors()
   saveWorks()
   ElMessage.success('工作经历添加成功！')
 }
@@ -81,7 +42,6 @@ const removeWork = (id: string) => {
   const index = works.value.findIndex(work => work.id === id)
   if (index >= 0) {
     works.value.splice(index, 1)
-    delete editors.value[id]
     saveWorks()
     ElMessage.success('工作经历删除成功！')
   }
@@ -191,34 +151,13 @@ watch(() => resumeStore.currentResume, () => {
           </el-row>
           
           <el-form-item label="工作内容" required>
-            <div class="editor-container">
-              <div class="editor-toolbar">
-                <el-button 
-                  type="text" 
-                  @click="editors[work.id]?.chain().focus().toggleBold().run()"
-                  :class="{ active: editors[work.id]?.isActive('bold') }"
-                >
-                  <el-icon><Bold /></el-icon>
-                </el-button>
-                <el-button 
-                  type="text" 
-                  @click="editors[work.id]?.chain().focus().toggleBulletList().run()"
-                  :class="{ active: editors[work.id]?.isActive('bulletList') }"
-                >
-                  <el-icon><List /></el-icon>
-                </el-button>
-                <el-button 
-                  type="text" 
-                  @click="editors[work.id]?.chain().focus().setLink({ href: prompt('请输入链接地址') }).run()"
-                >
-                  <el-icon><Link /></el-icon>
-                </el-button>
-              </div>
-              <EditorContent 
-                :editor="editors[work.id]" 
-                class="editor-content"
-              />
-            </div>
+            <el-input
+              v-model="work.description"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入工作内容，支持多行输入&#10;• 使用 • 或 - 开头添加列表项&#10;• 支持换行分段"
+              @input="updateWork(work.id, 'description', work.description)"
+            />
           </el-form-item>
         </el-form>
       </el-card>
@@ -272,50 +211,6 @@ watch(() => resumeStore.currentResume, () => {
   font-size: 14px;
   font-weight: 600;
   color: #409eff;
-}
-
-.editor-container {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.editor-toolbar {
-  display: flex;
-  gap: 10px;
-  padding: 8px 12px;
-  background: #f5f7fa;
-  border-bottom: 1px solid #dcdfe6;
-}
-
-.editor-toolbar .el-button {
-  padding: 4px 8px;
-}
-
-.editor-toolbar .el-button.active {
-  color: #409eff;
-  background: #ecf5ff;
-  border-color: #d9ecff;
-}
-
-.editor-content {
-  padding: 12px;
-  min-height: 120px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.editor-content :deep(p) {
-  margin: 0 0 10px 0;
-}
-
-.editor-content :deep(ul) {
-  margin: 0 0 10px 0;
-  padding-left: 20px;
-}
-
-.editor-content :deep(li) {
-  margin: 5px 0;
 }
 
 @media (max-width: 768px) {
