@@ -102,19 +102,111 @@ const applyToResume = () => {
     type: 'warning'
   }).then(() => {
     if (resumeStore.currentResume) {
-      // 这里可以根据生成的内容自动填充到对应模块
-      // 简化处理，仅更新基本信息
+      // 解析生成的内容，提取信息
+      const content = generatedContent.value
+      const parsedInfo = parseGeneratedContent(content)
+      
+      // 更新简历数据
       const updatedResume = {
         ...resumeStore.currentResume,
         basic: {
           ...resumeStore.currentResume.basic,
-          // 可以从生成内容中提取信息
-        }
+          name: parsedInfo.name || resumeStore.currentResume.basic.name,
+          position: parsedInfo.position || resumeStore.currentResume.basic.position,
+          summary: parsedInfo.summary || resumeStore.currentResume.basic.summary
+        },
+        skills: parsedInfo.skills.length > 0 ? parsedInfo.skills : resumeStore.currentResume.skills,
+        work: parsedInfo.work.length > 0 ? parsedInfo.work : resumeStore.currentResume.work,
+        project: parsedInfo.project.length > 0 ? parsedInfo.project : resumeStore.currentResume.project
       }
+      
       resumeStore.saveResume(updatedResume)
       ElMessage.success('已成功应用到简历！')
     }
   })
+}
+
+// 解析生成的内容
+const parseGeneratedContent = (content: string) => {
+  const result = {
+    name: '',
+    position: '',
+    summary: '',
+    skills: [],
+    work: [],
+    project: []
+  }
+  
+  // 解析个人信息
+  const personalInfoMatch = content.match(/## 个人信息[\s\S]*?(?=##|$)/)
+  if (personalInfoMatch) {
+    const personalInfo = personalInfoMatch[0]
+    const nameMatch = personalInfo.match(/姓名：([^\n]+)/)
+    const positionMatch = personalInfo.match(/求职岗位：([^\n]+)/)
+    
+    if (nameMatch) result.name = nameMatch[1].trim()
+    if (positionMatch) result.position = positionMatch[1].trim()
+  }
+  
+  // 解析专业技能
+  const skillsMatch = content.match(/## 专业技能[\s\S]*?(?=##|$)/)
+  if (skillsMatch) {
+    const skills = skillsMatch[0]
+    const skillLines = skills.split('\n').filter(line => line.trim().startsWith('-'))
+    skillLines.forEach(line => {
+      const skill = line.trim().replace(/^-\s*/, '').trim()
+      if (skill) {
+        result.skills.push({
+          id: crypto.randomUUID(),
+          name: skill,
+          level: '熟练'
+        })
+      }
+    })
+  }
+  
+  // 解析工作经历
+  const workMatch = content.match(/## 工作经历[\s\S]*?(?=##|$)/)
+  if (workMatch) {
+    const work = workMatch[0]
+    const workLines = work.split('\n').filter(line => line.trim().startsWith('-'))
+    workLines.forEach(line => {
+      const workItem = line.trim().replace(/^-\s*/, '').trim()
+      if (workItem) {
+        result.work.push({
+          id: crypto.randomUUID(),
+          company: '公司名称',
+          position: '职位',
+          startDate: '',
+          endDate: '',
+          description: workItem
+        })
+      }
+    })
+  }
+  
+  // 解析项目经验
+  const projectMatch = content.match(/## 项目经验[\s\S]*?(?=##|$)/)
+  if (projectMatch) {
+    const project = projectMatch[0]
+    const projectLines = project.split('\n').filter(line => line.trim().startsWith('-'))
+    projectLines.forEach(line => {
+      const projectItem = line.trim().replace(/^-\s*/, '').trim()
+      if (projectItem) {
+        result.project.push({
+          id: crypto.randomUUID(),
+          name: '项目名称',
+          startDate: '',
+          endDate: '',
+          role: '角色',
+          description: projectItem,
+          technologies: []
+        })
+      }
+    })
+  }
+  
+  return result
 }
 </script>
 
