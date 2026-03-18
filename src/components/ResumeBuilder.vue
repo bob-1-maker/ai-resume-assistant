@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage, ElLoading } from 'element-plus'
 import { useResumeStore } from '@/store'
 import AIGenerate from './AIGenerate.vue'
@@ -26,9 +26,9 @@ const modules = ref([
 ])
 
 const templates = [
-  { id: 'simple', name: '简约单栏' },
-  { id: 'business', name: '商务双栏' },
-  { id: 'campus', name: '校园风' }
+  { id: 'business', name: '商务简约风' },
+  { id: 'tech', name: '科技极客风' },
+  { id: 'campus', name: '应届生清新风' }
 ]
 
 const currentTemplate = computed(() => resumeStore.activeTemplate)
@@ -53,6 +53,22 @@ const sortedModules = computed(() => {
   return moduleOrder.value.map(id => modules.value.find(m => m.id === id)).filter(Boolean)
 })
 
+// 动态加载模板样式
+const loadTemplateStyle = (template: string) => {
+  // 移除旧的模板样式
+  const oldLink = document.getElementById('template-style')
+  if (oldLink) {
+    oldLink.remove()
+  }
+  
+  // 创建新的样式链接
+  const link = document.createElement('link')
+  link.id = 'template-style'
+  link.rel = 'stylesheet'
+  link.href = `/templates/template-${template}.css`
+  document.head.appendChild(link)
+}
+
 const handleTemplateChange = async (template: string) => {
   isLoading.value = true
   
@@ -63,7 +79,9 @@ const handleTemplateChange = async (template: string) => {
   })
   
   try {
-    await new Promise(resolve => setTimeout(resolve, 800))
+    // 加载模板样式
+    loadTemplateStyle(template)
+    await new Promise(resolve => setTimeout(resolve, 500))
     resumeStore.setActiveTemplate(template)
     ElMessage.success('模板切换成功！')
   } finally {
@@ -71,6 +89,11 @@ const handleTemplateChange = async (template: string) => {
     isLoading.value = false
   }
 }
+
+// 组件挂载时加载当前模板样式
+onMounted(() => {
+  loadTemplateStyle(resumeStore.activeTemplate)
+})
 
 const togglePreviewMode = () => {
   isPreviewMode.value = !isPreviewMode.value
@@ -249,261 +272,462 @@ const handleDragEnd = () => {
         class="resume-preview"
         :class="`tmpl-${currentTemplate}`"
       >
-        <!-- 简约单栏模板 -->
-        <div v-if="currentTemplate === 'simple'" class="tmpl-simple">
+        <!-- 科技极客风模板 -->
+        <div v-if="currentTemplate === 'tech'" class="resume-container">
+          <div class="resume-title">RESUME</div>
+          
           <!-- 个人信息 -->
-          <div v-if="moduleOrder.includes('basic')" class="section basic-info">
-            <h1>{{ resumeStore.currentResume?.basic.name || '姓名' }}</h1>
-            <div class="contact">
-              <span v-if="resumeStore.currentResume?.basic.phone">{{ resumeStore.currentResume.basic.phone }}</span>
-              <span v-if="resumeStore.currentResume?.basic.email"> | {{ resumeStore.currentResume.basic.email }}</span>
-              <span v-if="resumeStore.currentResume?.basic.location"> | {{ resumeStore.currentResume.basic.location }}</span>
-            </div>
-            <div class="contact">
-              <span v-if="resumeStore.currentResume?.basic.position">{{ resumeStore.currentResume.basic.position }}</span>
-              <span v-if="resumeStore.currentResume?.basic.expectedSalary"> | {{ resumeStore.currentResume.basic.expectedSalary }}</span>
-            </div>
-            <div class="summary" v-if="resumeStore.currentResume?.basic.summary">
-              {{ resumeStore.currentResume.basic.summary }}
-            </div>
-          </div>
-          
-          <!-- 教育经历 -->
-          <div v-if="moduleOrder.includes('education')" class="section">
-            <div class="section-title">教育经历</div>
-            <div v-if="resumeStore.currentResume?.education.length">
-              <div v-for="edu in resumeStore.currentResume.education" :key="edu.id" class="education-item">
-                <div class="item-header">
-                  <span class="item-title">{{ edu.school }}</span>
-                  <span class="item-period">{{ edu.startDate }} - {{ edu.endDate }}</span>
-                </div>
-                <div class="item-subtitle">{{ edu.degree }} | {{ edu.major }}</div>
-                <div class="item-description" v-if="edu.description">{{ edu.description }}</div>
+          <div class="personal-info">
+            <div class="name-section">
+              <h1 class="resume-name">{{ resumeStore.currentResume?.basic.name || '你的名字' }}</h1>
+              <p class="resume-summary">{{ resumeStore.currentResume?.basic.summary || '一句话介绍自己，告诉HR为什么选择你而不是别人' }}</p>
+              <div class="contact-info">
+                <span v-if="resumeStore.currentResume?.basic.age">{{ resumeStore.currentResume.basic.age }} | </span>
+                <span v-if="resumeStore.currentResume?.basic.workYears">{{ resumeStore.currentResume.basic.workYears }} | </span>
+                <span v-if="resumeStore.currentResume?.basic.phone">{{ resumeStore.currentResume.basic.phone }} | </span>
+                <span v-if="resumeStore.currentResume?.basic.email">{{ resumeStore.currentResume.basic.email }}</span>
               </div>
             </div>
-            <div v-else class="empty-section">暂无教育经历</div>
-          </div>
-          
-          <!-- 工作经历 -->
-          <div v-if="moduleOrder.includes('work')" class="section">
-            <div class="section-title">工作经历</div>
-            <div v-if="resumeStore.currentResume?.work.length">
-              <div v-for="work in resumeStore.currentResume.work" :key="work.id" class="work-item">
-                <div class="item-header">
-                  <span class="item-title">{{ work.position }}</span>
-                  <span class="item-period">{{ work.startDate }} - {{ work.endDate }}</span>
-                </div>
-                <div class="item-subtitle">{{ work.company }}</div>
-                <div class="item-description">{{ work.description }}</div>
-              </div>
+            <div class="avatar-section">
+              <img class="avatar" src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20portrait%20of%20a%20young%20Chinese%20man%2C%20clean%20background%2C%20business%20style&image_size=square" alt="头像" />
             </div>
-            <div v-else class="empty-section">暂无工作经历</div>
           </div>
-          
-          <!-- 项目经验 -->
-          <div v-if="moduleOrder.includes('project')" class="section">
-            <div class="section-title">项目经验</div>
-            <div v-if="resumeStore.currentResume?.project.length">
-              <div v-for="project in resumeStore.currentResume.project" :key="project.id" class="project-item">
-                <div class="item-header">
-                  <span class="item-title">{{ project.name }}</span>
-                  <span class="item-period">{{ project.startDate }} - {{ project.endDate }}</span>
+
+          <!-- 求职意向 -->
+          <div v-if="moduleOrder.includes('basic') && resumeStore.currentResume?.basic.position" class="resume-section">
+            <h3 class="section-title">
+              <span class="section-icon">🎯</span>
+              求职意向
+            </h3>
+            <div class="section-content">
+              <div class="job-intent">
+                <div class="intent-item">
+                  <span class="intent-icon">🔧</span>
+                  <span>意向岗位：{{ resumeStore.currentResume.basic.position }}</span>
                 </div>
-                <div class="item-subtitle">{{ project.role }}</div>
-                <div class="item-description">{{ project.description }}</div>
-                <div class="item-technologies" v-if="project.technologies.length">
-                  <span class="tech-label">技术栈：</span>
-                  <span v-for="tech in project.technologies" :key="tech" class="tech-tag">{{ tech }}</span>
+                <div class="intent-item">
+                  <span class="intent-icon">📍</span>
+                  <span>意向城市：{{ resumeStore.currentResume.basic.location || '填写城市' }}</span>
+                </div>
+                <div class="intent-item">
+                  <span class="intent-icon">💰</span>
+                  <span>薪资要求：{{ resumeStore.currentResume.basic.expectedSalary || '填写薪资' }}</span>
+                </div>
+                <div class="intent-item">
+                  <span class="intent-icon">⏰</span>
+                  <span>入职时间：{{ resumeStore.currentResume.basic.availability || '填写入职时间' }}</span>
                 </div>
               </div>
             </div>
-            <div v-else class="empty-section">暂无项目经验</div>
           </div>
-          
-          <!-- 技能证书 -->
-          <div v-if="moduleOrder.includes('skills')" class="section">
-            <div class="section-title">技能证书</div>
-            <div v-if="resumeStore.currentResume?.skills.length" class="skills">
-              <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" class="skill-item">
-                {{ skill.name }} ({{ skill.level }})
-              </span>
-            </div>
-            <div v-else class="empty-section">暂无技能证书</div>
-          </div>
-        </div>
-        
-        <!-- 商务双栏模板 -->
-        <div v-else-if="currentTemplate === 'business'" class="tmpl-business">
-          <div class="resume-container">
-            <!-- 侧边栏 -->
-            <div class="sidebar">
-              <!-- 个人信息 -->
-              <div v-if="moduleOrder.includes('basic')" class="section">
-                <div class="section-title">基本信息</div>
-                <div class="basic-info">
-                  <h1>{{ resumeStore.currentResume?.basic.name || '姓名' }}</h1>
-                  <div class="contact" v-if="resumeStore.currentResume?.basic.phone">
-                    {{ resumeStore.currentResume.basic.phone }}
+
+          <!-- 教育背景 -->
+          <div v-if="moduleOrder.includes('education')" class="resume-section">
+            <h3 class="section-title">
+              <span class="section-icon">🎓</span>
+              教育背景
+            </h3>
+            <div class="section-content">
+              <div v-if="resumeStore.currentResume?.education.length">
+                <div v-for="edu in resumeStore.currentResume.education" :key="edu.id" class="education-item">
+                  <div class="education-header">
+                    <div class="education-time">{{ edu.startDate }} - {{ edu.endDate }}</div>
+                    <div class="education-school">{{ edu.school }}</div>
                   </div>
-                  <div class="contact" v-if="resumeStore.currentResume?.basic.email">
-                    {{ resumeStore.currentResume.basic.email }}
-                  </div>
-                  <div class="contact" v-if="resumeStore.currentResume?.basic.location">
-                    {{ resumeStore.currentResume.basic.location }}
-                  </div>
-                  <div class="summary" v-if="resumeStore.currentResume?.basic.summary">
-                    {{ resumeStore.currentResume.basic.summary }}
-                  </div>
+                  <div class="education-major">{{ edu.major }} {{ edu.degree }}</div>
+                  <div class="education-description" v-if="edu.description">{{ edu.description }}</div>
                 </div>
               </div>
-              
-              <!-- 技能证书 -->
-              <div v-if="moduleOrder.includes('skills')" class="section">
-                <div class="section-title">技能</div>
-                <div v-if="resumeStore.currentResume?.skills.length" class="skills">
-                  <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" class="skill-item">
+              <div v-else class="empty-section">
+                <div class="education-item">
+                  <div class="education-header">
+                    <div class="education-time">设置时间</div>
+                    <div class="education-school">填写学校名称</div>
+                  </div>
+                  <div class="education-major">填写专业名称</div>
+                  <div class="education-description">详细描述你的教育经历，突出重点，成绩优异的话请写上GPA及排名等信息，如：GPA：3.72/4（专业前10%） GRE：324</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 工作经历 / 实习经历 -->
+          <div v-if="moduleOrder.includes('work')" class="resume-section">
+            <h3 class="section-title">
+              <span class="section-icon">💼</span>
+              {{ currentTemplate === 'campus' ? '实习经历' : '工作经历' }}
+            </h3>
+            <div class="section-content">
+              <div v-if="resumeStore.currentResume?.work.length">
+                <div v-for="work in resumeStore.currentResume.work" :key="work.id" class="work-item">
+                  <div class="work-header">
+                    <div class="work-time">{{ work.startDate }} - {{ work.endDate }}</div>
+                    <div class="work-company">{{ work.company }}</div>
+                  </div>
+                  <div class="work-position">{{ work.position }}</div>
+                  <div class="work-description">{{ work.description }}</div>
+                </div>
+              </div>
+              <div v-else class="empty-section">
+                <div class="work-item">
+                  <div class="work-header">
+                    <div class="work-time">设置时间</div>
+                    <div class="work-company">填写公司名称</div>
+                  </div>
+                  <div class="work-position">填写职位名称</div>
+                  <div class="work-description">详细描述你的职责范围、工作任务及取得的成绩，工作经验的时间采取倒叙形式，最近经历写在前面，描述尽量具体简洁，工作经验的描述与目标岗位的招聘要求尽量匹配，用词精准。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 技能特长 -->
+          <div v-if="moduleOrder.includes('skills')" class="resume-section">
+            <h3 class="section-title">
+              <span class="section-icon">⚡</span>
+              技能特长
+            </h3>
+            <div class="section-content">
+              <div class="skills-container">
+                <div v-if="resumeStore.currentResume?.skills.length">
+                  <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" style="margin-right: 10px; font-size: 11px;">
                     {{ skill.name }}
                   </span>
                 </div>
+                <div v-else>暂无技能证书</div>
               </div>
+              <div class="add-skills">+ 添加技能特长</div>
             </div>
-            
-            <!-- 主内容 -->
-            <div class="main-content">
-              <!-- 求职意向 -->
-              <div v-if="moduleOrder.includes('basic') && resumeStore.currentResume?.basic.position" class="section">
-                <div class="section-title">求职意向</div>
-                <div class="position-info">
-                  <div class="item-title">{{ resumeStore.currentResume.basic.position }}</div>
-                  <div v-if="resumeStore.currentResume.basic.expectedSalary" class="item-subtitle">
-                    期望薪资：{{ resumeStore.currentResume.basic.expectedSalary }}
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 教育经历 -->
-              <div v-if="moduleOrder.includes('education')" class="section">
-                <div class="section-title">教育经历</div>
-                <div v-if="resumeStore.currentResume?.education.length">
-                  <div v-for="edu in resumeStore.currentResume.education" :key="edu.id" class="education-item">
-                    <div class="item-header">
-                      <span class="item-title">{{ edu.school }}</span>
-                      <span class="item-period">{{ edu.startDate }} - {{ edu.endDate }}</span>
-                    </div>
-                    <div class="item-subtitle">{{ edu.degree }} | {{ edu.major }}</div>
-                    <div class="item-description" v-if="edu.description">{{ edu.description }}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 工作经历 -->
-              <div v-if="moduleOrder.includes('work')" class="section">
-                <div class="section-title">工作经历</div>
-                <div v-if="resumeStore.currentResume?.work.length">
-                  <div v-for="work in resumeStore.currentResume.work" :key="work.id" class="work-item">
-                    <div class="item-header">
-                      <span class="item-title">{{ work.position }}</span>
-                      <span class="item-period">{{ work.startDate }} - {{ work.endDate }}</span>
-                    </div>
-                    <div class="item-subtitle">{{ work.company }}</div>
-                    <div class="item-description">{{ work.description }}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 项目经验 -->
-              <div v-if="moduleOrder.includes('project')" class="section">
-                <div class="section-title">项目经验</div>
-                <div v-if="resumeStore.currentResume?.project.length">
-                  <div v-for="project in resumeStore.currentResume.project" :key="project.id" class="project-item">
-                    <div class="item-header">
-                      <span class="item-title">{{ project.name }}</span>
-                      <span class="item-period">{{ project.startDate }} - {{ project.endDate }}</span>
-                    </div>
-                    <div class="item-subtitle">{{ project.role }}</div>
-                    <div class="item-description">{{ project.description }}</div>
-                  </div>
-                </div>
+          </div>
+
+          <!-- 自我评价 -->
+          <div class="resume-section">
+            <h3 class="section-title">
+              <span class="section-icon">📝</span>
+              自我评价
+            </h3>
+            <div class="section-content">
+              <div class="self-evaluation">
+                篇幅不要太长，注意结合简历整体的美观度，如果真的有很多话要说，建议以求职信的形式附上。自我评价应做到突出自身符合目标岗位要求的"卖点"，避免过多使用形容词，而应该通过数据及实例来对自身价值进行深化。
               </div>
             </div>
           </div>
         </div>
         
-        <!-- 校园风模板 -->
-        <div v-else-if="currentTemplate === 'campus'" class="tmpl-campus">
-          <!-- 个人信息 -->
-          <div v-if="moduleOrder.includes('basic')" class="section basic-info">
-            <h1>{{ resumeStore.currentResume?.basic.name || '姓名' }}</h1>
-            <div class="contact">
-              <span v-if="resumeStore.currentResume?.basic.phone">{{ resumeStore.currentResume.basic.phone }}</span>
-              <span v-if="resumeStore.currentResume?.basic.email"> | {{ resumeStore.currentResume.basic.email }}</span>
-            </div>
-            <div class="contact">
-              <span v-if="resumeStore.currentResume?.basic.position">{{ resumeStore.currentResume.basic.position }}</span>
-            </div>
-            <div class="summary" v-if="resumeStore.currentResume?.basic.summary">
-              {{ resumeStore.currentResume.basic.summary }}
-            </div>
-          </div>
-          
-          <!-- 教育经历 -->
-          <div v-if="moduleOrder.includes('education')" class="section">
-            <div class="section-title">教育经历</div>
-            <div v-if="resumeStore.currentResume?.education.length">
-              <div v-for="edu in resumeStore.currentResume.education" :key="edu.id" class="education-item">
-                <div class="item-header">
-                  <span class="item-title">{{ edu.school }}</span>
-                  <span class="item-period">{{ edu.startDate }} - {{ edu.endDate }}</span>
-                </div>
-                <div class="item-subtitle">{{ edu.degree }} | {{ edu.major }}</div>
-                <div class="item-description" v-if="edu.description">{{ edu.description }}</div>
+        <!-- 应届清新风模板 -->
+        <div v-else-if="currentTemplate === 'campus'" class="resume-container">
+          <!-- 个人信息部分 -->
+          <div class="resume-personal">
+            <div class="resume-info">
+              <h1 class="resume-name">{{ resumeStore.currentResume?.basic.name || '你的名字' }}</h1>
+              <p class="resume-summary">{{ resumeStore.currentResume?.basic.summary || '一句话介绍自己，告诉HR为什么选择你而不是别人' }}</p>
+              <div class="resume-contact">
+                <span class="contact-item">
+                  <span class="contact-icon">📅</span> {{ resumeStore.currentResume?.basic.age || '年龄' }}
+                </span>
+                <span class="contact-item">
+                  <span class="contact-icon">💼</span> {{ resumeStore.currentResume?.basic.workYears || '工作年限' }}
+                </span>
+                <span class="contact-item">
+                  <span class="contact-icon">📞</span> {{ resumeStore.currentResume?.basic.phone || '联系电话' }}
+                </span>
+                <span class="contact-item">
+                  <span class="contact-icon">✉️</span> {{ resumeStore.currentResume?.basic.email || '电子邮箱' }}
+                </span>
               </div>
             </div>
-            <div v-else class="empty-section">暂无教育经历</div>
+            <div class="resume-avatar">
+              <img class="avatar-img" src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20portrait%20of%20a%20young%20Chinese%20man%2C%20clean%20background%2C%20business%20style&image_size=square" alt="头像" />
+            </div>
           </div>
           
-          <!-- 项目经验 -->
-          <div v-if="moduleOrder.includes('project')" class="section">
-            <div class="section-title">项目经验</div>
-            <div v-if="resumeStore.currentResume?.project.length">
-              <div v-for="project in resumeStore.currentResume.project" :key="project.id" class="project-item">
-                <div class="item-header">
-                  <span class="item-title">{{ project.name }}</span>
-                  <span class="item-period">{{ project.startDate }} - {{ project.endDate }}</span>
-                </div>
-                <div class="item-subtitle">{{ project.role }}</div>
-                <div class="item-description">{{ project.description }}</div>
+          <!-- 求职意向 -->
+          <div class="resume-section">
+            <h2 class="section-title">
+              <span class="section-icon">🎯</span> 求职意向
+            </h2>
+            <div class="job-intent">
+              <div class="intent-item">
+                <span class="intent-icon">🔧</span>
+                <span>{{ resumeStore.currentResume?.basic.position || '意向岗位' }}</span>
+              </div>
+              <div class="intent-item">
+                <span class="intent-icon">📍</span>
+                <span>{{ resumeStore.currentResume?.basic.location || '意向城市' }}</span>
+              </div>
+              <div class="intent-item">
+                <span class="intent-icon">💰</span>
+                <span>{{ resumeStore.currentResume?.basic.expectedSalary || '薪资要求' }}</span>
+              </div>
+              <div class="intent-item">
+                <span class="intent-icon">⏰</span>
+                <span>{{ resumeStore.currentResume?.basic.availability || '入职时间' }}</span>
               </div>
             </div>
-            <div v-else class="empty-section">暂无项目经验</div>
           </div>
           
-          <!-- 工作经历 -->
-          <div v-if="moduleOrder.includes('work')" class="section">
-            <div class="section-title">实习经历</div>
-            <div v-if="resumeStore.currentResume?.work.length">
-              <div v-for="work in resumeStore.currentResume.work" :key="work.id" class="work-item">
-                <div class="item-header">
-                  <span class="item-title">{{ work.position }}</span>
-                  <span class="item-period">{{ work.startDate }} - {{ work.endDate }}</span>
+          <!-- 教育背景 -->
+          <div class="resume-section">
+            <h2 class="section-title">
+              <span class="section-icon">🎓</span> 教育背景
+            </h2>
+            <div class="education-item">
+              <div class="education-header">
+                <span class="education-time">{{ resumeStore.currentResume?.education[0]?.startDate || '设置时间' }} - {{ resumeStore.currentResume?.education[0]?.endDate || '设置时间' }}</span>
+                <span class="education-school">{{ resumeStore.currentResume?.education[0]?.school || '填写学校名称' }}</span>
+                <span class="education-major">{{ resumeStore.currentResume?.education[0]?.major || '填写专业名称' }}</span>
+              </div>
+              <p class="education-description">
+                {{ resumeStore.currentResume?.education[0]?.description || '尽量简洁，突出重点，成绩优异的话建议写上GPA及排名等信息，如：GPA: 3.7/4（专业前10%）GRE: 324' }}
+              </p>
+            </div>
+          </div>
+          
+          <!-- 工作经验 -->
+          <div class="resume-section">
+            <h2 class="section-title">
+              <span class="section-icon">💼</span> {{ currentTemplate === 'campus' ? '实习经历' : '工作经历' }}
+            </h2>
+            <div class="work-item">
+              <div class="work-header">
+                <span class="work-time">{{ resumeStore.currentResume?.work[0]?.startDate || '设置时间' }} - {{ resumeStore.currentResume?.work[0]?.endDate || '设置时间' }}</span>
+                <span class="work-company">{{ resumeStore.currentResume?.work[0]?.company || '填写公司名称' }}</span>
+                <span class="work-position">{{ resumeStore.currentResume?.work[0]?.position || '填写职位名称' }}</span>
+              </div>
+              <p class="work-description">
+                {{ resumeStore.currentResume?.work[0]?.description || '详细描述你的职责范围、工作任务及取得的成绩，工作经验的时间采取倒叙形式，最近经历写在前面，描述尽量具体简洁，工作经验的描述与目标岗位的招聘要求尽量匹配，用词精准。' }}
+              </p>
+            </div>
+          </div>
+          
+          <!-- 技能特长 -->
+          <div class="resume-section">
+            <h2 class="section-title">
+              <span class="section-icon">🔧</span> 技能特长
+            </h2>
+            <div class="skills-container">
+              <div v-if="resumeStore.currentResume?.skills.length">
+                <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" style="margin-right: 10px; font-size: 11px;">
+                  {{ skill.name }}
+                </span>
+              </div>
+              <div v-else>暂无技能证书</div>
+            </div>
+            <div class="add-skills">+ 添加技能特长</div>
+          </div>
+          
+          <!-- 自我评价 -->
+          <div class="resume-section">
+            <h2 class="section-title">
+              <span class="section-icon">👤</span> 自我评价
+            </h2>
+            <p class="self-evaluation">
+              篇幅不要太长，注意结合简历整体的美观度，如果真的有很多话要说，建议以求职信的形式附上。自我评价应做到突出自身符合目标岗位要求的「卖点」，避免过多使用形容词，而应该通过数据及实例来对自身价值进行深化。
+            </p>
+          </div>
+        </div>
+
+        <!-- 其他模板的布局 -->
+        <div v-else class="resume-container">
+            <!-- 侧边栏 -->
+            <div class="resume-sidebar">
+              <!-- 头像 -->
+              <div class="avatar-section">
+                <div class="avatar">
+                  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20portrait%20of%20a%20young%20Chinese%20man%2C%20clean%20background%2C%20business%20style&image_size=square" alt="头像" />
                 </div>
-                <div class="item-subtitle">{{ work.company }}</div>
-                <div class="item-description">{{ work.description }}</div>
+              </div>
+
+              <!-- 个人信息 -->
+              <div v-if="moduleOrder.includes('basic')" class="sidebar-section">
+                <h3 class="sidebar-title">
+                  <i class="icon">👤</i>
+                  个人信息
+                </h3>
+                <div class="sidebar-content">
+                  <div class="info-item" v-if="resumeStore.currentResume?.basic.age">
+                    <span class="info-icon">📅</span>
+                    <span>年龄：{{ resumeStore.currentResume.basic.age }}</span>
+                  </div>
+                  <div class="info-item" v-if="resumeStore.currentResume?.basic.workYears">
+                    <span class="info-icon">💼</span>
+                    <span>工作年限：{{ resumeStore.currentResume.basic.workYears }}</span>
+                  </div>
+                  <div class="info-item" v-if="resumeStore.currentResume?.basic.phone">
+                    <span class="info-icon">📱</span>
+                    <span>联系电话：{{ resumeStore.currentResume.basic.phone }}</span>
+                  </div>
+                  <div class="info-item" v-if="resumeStore.currentResume?.basic.email">
+                    <span class="info-icon">📧</span>
+                    <span>电子邮箱：{{ resumeStore.currentResume.basic.email }}</span>
+                  </div>
+                  <div class="info-item" v-if="resumeStore.currentResume?.basic.location">
+                    <span class="info-icon">📍</span>
+                    <span>所在城市：{{ resumeStore.currentResume.basic.location }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 技能特长 -->
+              <div v-if="moduleOrder.includes('skills')" class="sidebar-section">
+                <h3 class="sidebar-title">
+                  <i class="icon">⚡</i>
+                  技能特长
+                </h3>
+                <div class="sidebar-content">
+                  <div v-if="resumeStore.currentResume?.skills.length" class="skills-container">
+                    <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" class="skill-item">
+                      {{ skill.name }}
+                    </span>
+                  </div>
+                  <div v-else class="empty-section">暂无技能证书</div>
+                  <div class="add-button">+ 添加技能特长</div>
+                </div>
+              </div>
+
+              <!-- 兴趣爱好 -->
+              <div class="sidebar-section">
+                <h3 class="sidebar-title">
+                  <i class="icon">🎯</i>
+                  兴趣爱好
+                </h3>
+                <div class="sidebar-content">
+                  <div class="hobbies-container">
+                    <span class="hobby-item">阅读</span>
+                    <span class="hobby-item">旅行</span>
+                    <span class="hobby-item">运动</span>
+                  </div>
+                  <div class="add-button">+ 添加兴趣爱好</div>
+                </div>
               </div>
             </div>
-            <div v-else class="empty-section">暂无实习经历</div>
-          </div>
-          
-          <!-- 技能证书 -->
-          <div v-if="moduleOrder.includes('skills')" class="section">
-            <div class="section-title">技能证书</div>
-            <div v-if="resumeStore.currentResume?.skills.length" class="skills">
-              <span v-for="skill in resumeStore.currentResume.skills" :key="skill.id" class="skill-item">
-                {{ skill.name }}
-              </span>
+
+            <!-- 主内容区 -->
+            <div class="resume-main">
+              <!-- 顶部信息 -->
+              <div class="resume-header">
+                <h1 class="resume-name">{{ resumeStore.currentResume?.basic.name || '你的名字' }}</h1>
+                <p class="resume-summary">{{ resumeStore.currentResume?.basic.summary || '一句话介绍自己，告诉HR为什么选择你而不是别人' }}</p>
+              </div>
+
+              <!-- 求职意向 -->
+              <div v-if="moduleOrder.includes('basic') && resumeStore.currentResume?.basic.position" class="main-section">
+                <h3 class="section-title">
+                  <span class="section-icon">🎯</span>
+                  求职意向
+                </h3>
+                <div class="section-content">
+                  <div class="job-intent">
+                    <div class="intent-item">
+                      <span class="intent-icon">🔧</span>
+                      <span>意向岗位：{{ resumeStore.currentResume.basic.position }}</span>
+                    </div>
+                    <div class="intent-item">
+                      <span class="intent-icon">📍</span>
+                      <span>意向城市：{{ resumeStore.currentResume.basic.location || '填写城市' }}</span>
+                    </div>
+                    <div class="intent-item">
+                      <span class="intent-icon">💰</span>
+                      <span>薪资要求：{{ resumeStore.currentResume.basic.expectedSalary || '填写薪资' }}</span>
+                    </div>
+                    <div class="intent-item">
+                      <span class="intent-icon">⏰</span>
+                      <span>入职时间：{{ resumeStore.currentResume.basic.availability || '填写入职时间' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 教育背景 -->
+              <div v-if="moduleOrder.includes('education')" class="main-section">
+                <h3 class="section-title">
+                  <span class="section-icon">🎓</span>
+                  教育背景
+                </h3>
+                <div class="section-content">
+                  <div v-if="resumeStore.currentResume?.education.length">
+                    <div v-for="edu in resumeStore.currentResume.education" :key="edu.id" class="education-item">
+                      <div class="item-header">
+                        <div class="item-period">{{ edu.startDate }} - {{ edu.endDate }}</div>
+                        <div class="item-title">{{ edu.school }}</div>
+                      </div>
+                      <div class="item-meta">{{ edu.major }} {{ edu.degree }}</div>
+                      <div class="item-description" v-if="edu.description">{{ edu.description }}</div>
+                    </div>
+                  </div>
+                  <div v-else class="empty-section">
+                    <div class="education-item">
+                      <div class="item-header">
+                        <div class="item-period">设置时间</div>
+                        <div class="item-title">填写学校名称</div>
+                      </div>
+                      <div class="item-meta">填写专业名称</div>
+                      <div class="item-description">详细描述你的教育经历，突出重点，成绩优异的话请写上GPA及排名等信息，如：GPA：3.72/4（专业前10%） GRE：324</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 工作经历 / 实习经历 -->
+              <div v-if="moduleOrder.includes('work')" class="main-section">
+                <h3 class="section-title">
+                  <span class="section-icon">💼</span>
+                  {{ currentTemplate === 'campus' ? '实习经历' : '工作经历' }}
+                </h3>
+                <div class="section-content">
+                  <div v-if="resumeStore.currentResume?.work.length">
+                    <div v-for="work in resumeStore.currentResume.work" :key="work.id" class="experience-item">
+                      <div class="item-header">
+                        <div class="item-period">{{ work.startDate }} - {{ work.endDate }}</div>
+                        <div class="item-title">{{ work.position }}</div>
+                      </div>
+                      <div class="item-company">{{ work.company }}</div>
+                      <div class="item-description">{{ work.description }}</div>
+                    </div>
+                  </div>
+                  <div v-else class="empty-section">
+                    <div class="experience-item">
+                      <div class="item-header">
+                        <div class="item-period">设置时间</div>
+                        <div class="item-title">填写职位名称</div>
+                      </div>
+                      <div class="item-company">填写公司名称</div>
+                      <div class="item-description">详细描述你的职责范围、工作任务及取得的成绩，工作经验的时间采取倒叙形式，最近经历写在前面，描述尽量具体简洁，工作经验的描述与目标岗位的招聘要求尽量匹配，用词精准。</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 荣誉奖项 -->
+              <div class="main-section">
+                <h3 class="section-title">
+                  <span class="section-icon">🏆</span>
+                  荣誉奖项
+                </h3>
+                <div class="section-content">
+                  <div class="award-item">
+                    <div class="item-header">
+                      <div class="item-period">2024-06</div>
+                      <div class="item-title">优秀员工奖</div>
+                    </div>
+                    <div class="item-description">详细描述你所获得的奖项荣誉，时间倒叙，与目标岗位相关性强的写在前面，只写有代表性的奖项即可，同年或同类别的奖项可进行适当合并。</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 自我评价 -->
+              <div class="main-section">
+                <h3 class="section-title">
+                  <span class="section-icon">📝</span>
+                  自我评价
+                </h3>
+                <div class="section-content">
+                  <div class="self-evaluation">
+                    篇幅不要太长，注意结合简历整体的美观度，如果真的有很多话要说，建议以求职信的形式附上。自我评价应做到突出自身符合目标岗位要求的"卖点"，避免过多使用形容词，而应该通过数据及实例来对自身价值进行深化。
+                  </div>
+                </div>
+              </div>
             </div>
-            <div v-else class="empty-section">暂无技能证书</div>
-          </div>
         </div>
       </div>
     </div>
@@ -606,8 +830,9 @@ const handleDragEnd = () => {
 }
 
 .preview-mode {
-  padding: 40px 20px;
+  padding: 20px;
   background: #f5f7fa;
+  overflow-x: auto;
 }
 
 .resume-preview {
@@ -617,6 +842,7 @@ const handleDragEnd = () => {
   background: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   position: relative;
+  max-width: 100%;
 }
 
 .template-loading {

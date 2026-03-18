@@ -1,0 +1,274 @@
+/* 科技极客风模板 - 适合互联网/技术公司 */
+
+/* 简历容器 */
+.resume-container {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 0;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #333;
+  background: white;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  border-top: 40px solid #34495e;
+  border-bottom: 10px solid #34495e;
+}
+
+/* 顶部标题 */
+.resume-title {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #34495e;
+  color: white;
+  padding: 8px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  clip-path: polygon(0% 0%, 15% 100%, 85% 100%, 100% 0%);
+}
+
+/* 个人信息 */
+.personal-info {
+  padding: 40px 50px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.name-section {
+  flex: 1;
+}
+
+.resume-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.resume-summary {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  max-width: 60%;
+}
+
+.contact-info {
+  font-size: 11px;
+  color: #777;
+  line-height: 1.4;
+}
+
+.avatar-section {
+  width: 100px;
+  height: 120px;
+  overflow: hidden;
+  border: 2px solid #34495e;
+  background: #e3f2fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  width: 80%;
+  height: 80%;
+  object-fit: cover;
+}
+
+/* 通用部分样式 */
+.resume-section {
+  margin: 0 50px 30px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: #34495e;
+  padding: 8px 20px;
+  margin-bottom: 15px;
+  clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%);
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: fit-content;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -300px;
+  width: 300px;
+  height: 2px;
+  background: #34495e;
+  transform: translateY(-50%);
+}
+
+.section-icon {
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.section-content {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #555;
+  letter-spacing: 0.5px;
+}
+
+/* 求职意向 */
+.job-intent {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #34495e;
+}
+
+.intent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.intent-icon {
+  font-size: 12px;
+  color: #3498db;
+}
+
+/* 教育背景 */
+.education-item {
+  margin-bottom: 20px;
+}
+
+.education-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #34495e;
+}
+
+.education-time {
+  font-size: 10px;
+  color: #999;
+  flex: 1;
+}
+
+.education-school {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  flex: 2;
+  text-align: center;
+}
+
+.education-major {
+  font-size: 12px;
+  color: #777;
+  flex: 2;
+  text-align: right;
+  margin-left: 0;
+}
+
+.education-description {
+  margin-top: 10px;
+  line-height: 1.6;
+  margin-left: 0;
+}
+
+/* 工作经验 */
+.work-item {
+  margin-bottom: 25px;
+}
+
+.work-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #34495e;
+}
+
+.work-time {
+  font-size: 10px;
+  color: #999;
+  flex: 1;
+}
+
+.work-company {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  flex: 2;
+  text-align: center;
+}
+
+.work-position {
+  font-size: 12px;
+  color: #777;
+  flex: 2;
+  text-align: right;
+  margin-left: 0;
+}
+
+.work-description {
+  margin-top: 10px;
+  line-height: 1.6;
+  margin-left: 0;
+}
+
+/* 技能特长 */
+.skills-container {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.add-skills {
+  font-size: 10px;
+  color: #999;
+  text-align: center;
+  padding: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px dashed #ccc;
+}
+
+/* 自我评价 */
+.self-evaluation {
+  line-height: 1.6;
+  color: #555;
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #3498db;
+}
+
+/* 响应式调整 */
+@media print {
+  .resume-container {
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  
+  .add-skills {
+    display: none;
+  }
+}
