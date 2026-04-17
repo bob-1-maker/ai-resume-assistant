@@ -1,0 +1,42 @@
+# GitHub 标签配置
+# 用于自动创建项目标签
+
+- name: "vue3"
+  color: "4FC08D"
+  description: "Vue 3 前端框架"
+
+- name: "tauri"
+  color: "FFC131"
+  description: "Tauri 桌面应用框架"
+
+- name: "ai"
+  color: "FF6B6B"
+  description: "人工智能相关功能"
+
+- name: "resume"
+  color: "4ECDC4"
+  description: "简历生成和管理"
+
+- name: "typescript"
+  color: "3178C6"
+  description: "TypeScript 类型安全"
+
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "good first issue"
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "008672"
+  description: "Extra attention is needed"

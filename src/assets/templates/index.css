@@ -1,0 +1,61 @@
+@import './simple.css';
+@import './business.css';
+@import './campus.css';
+
+/* 通用样式 */
+.resume-preview {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+/* 编辑态样式 */
+.edit-mode {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+/* 预览态样式 */
+.preview-mode {
+  padding: 0;
+}
+
+/* 加载动画 */
+.template-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 297mm;
+  width: 210mm;
+  margin: 0 auto;
+  background: white;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .resume-preview {
+    width: 100%;
+    min-height: auto;
+    box-shadow: none;
+  }
+  
+  .tmpl-simple,
+  .tmpl-business,
+  .tmpl-campus {
+    width: 100%;
+    min-height: auto;
+    padding: 20px;
+  }
+  
+  .tmpl-business .resume-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .tmpl-business .sidebar {
+    padding: 20px;
+  }
+}
